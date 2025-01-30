@@ -1,0 +1,16 @@
+{% extends "blog/layout.html" %}
+
+{% block body %}
+<div class="post-detail-container">
+    <h1 class="post-title">{{ post.title }}</h1>
+    <h6 class="post-meta">
+        <span class="post-author">{{ post.author|title }}</span>
+        <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
+    </h6>
+    <div class="post-content">
+        <p>{{ post.content }}</p>
+    </div>
+    <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="back-link">Back</a>
+</div>
+{% endblock %}
+
