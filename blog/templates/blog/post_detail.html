@@ -6,11 +6,67 @@
     <h6 class="post-meta">
         <span class="post-author">{{ post.author|title }}</span>
         <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
+        <span class="reading-time">{{ post.reading_time }} min read</span>
     </h6>
-    <div class="post-content">
-        <p>{{ post.content }}</p>
+    <div class="post-content" style="white-space: pre-wrap;">
+        {{ post.content }}
     </div>
-    <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="back-link">Back</a>
+
+    <div class="post-likes">
+    {% if user.is_authenticated %}
+      <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="like-button {% if user_has_liked %}liked{% endif %}">
+            <i class="fas fa-thumbs-up"></i>  
+          </button>
+      </form>
+    {% else %}
+        <a href="{% url 'blog:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
+    {% endif %}
+
+    <!-- Likes count separate from the button -->
+    <span id="likes-count">{{ post.likes }}</span> 
+    </div>
+
+    <a href="#" onclick="if (!window.history.back()) window.location.href='/'; return false;" class="back-link">Back</a>
+
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const likeButton = document.querySelector('.like-button');
+        const likesCount = document.getElementById('likes-count');
+        const likeForm = document.getElementById('like-form');
+
+        likeForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            fetch(likeForm.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    'post_slug': '{{ post.slug }}',
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update like count and button style
+                likesCount.textContent = data.likes;
+                if (data.user_has_liked) {
+                    likeButton.classList.add('liked');
+                } else {
+                    likeButton.classList.remove('liked');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+</script>
+
 {% endblock %}
 

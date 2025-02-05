@@ -3,12 +3,13 @@
 {% block body %}
 
   {% for post in post_list %}
-    <a href="{% url 'blog:post_detail' post.slug %}" class="post-link">
+  <a href="{{ post.get_absolute_url }}" class="post-link">
     <div class="post-container">
       <h2>{{ post.title }}</h2>
         <h6 class="author-date">
           <span>{{ post.author|title }}</span>
           <span>{{ post.pub_date|date:"F d, Y" }}</span>
+          <span class="reading-time">{{ post.reading_time }} min read</span>
         </h6>
       <p>{{ post.content|truncatewords:30 }}</p>
     </div>

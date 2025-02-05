@@ -1,0 +1,15 @@
+{% extends "blog/layout.html" %}
+
+{% block body %}
+
+  <h1>Login</h1>
+
+  <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="hidden" name="next" value="{{ request.GET.next }}">
+      <button type="submit" class="login-form-button">Login</button>
+  </form>
+  <p>Don't have an account? <a href="{% url 'blog:signup' %}">Signup</a></p>
+
+{% endblock %}
