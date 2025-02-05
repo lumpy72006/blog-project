@@ -15,10 +15,12 @@ env/
 
 # Media and static files
 media/
-static/
+staticfiles/
 
 # IDE and system files
 .vscode/
 .DS_Store
 *.log
-
+*.swp
+.idea/
+*.swo
