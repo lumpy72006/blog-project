@@ -26,8 +26,8 @@ header h1 a {
 
 .nav-right button,
 .nav-right a {
-  border-color: #1A891;
   border-width:1px;
+  border: none;
   color: green;
   text-decoration: none; /* Remove underline */
   font-size: 10px; /* Set font size for the link */
@@ -104,7 +104,7 @@ header h1 a {
 }
 
 .like-button.liked {
-    color: green; /* Change the color when liked */
+    color: #4CAF50; /* Change the color when liked */
 }
 
 .like-button:hover {
@@ -140,14 +140,63 @@ header h1 a {
     margin-bottom: 30px;
 }
 
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    width: 100%;
+
+}
+
+.edit-button, .delete-button {
+    padding: 10px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+
+}
+
+.edit-button {
+    background-color: #4CAF50; /* Green */
+}
+
+.edit-button:hover {
+    background-color: #45a049;
+}
+
+.delete-button {
+    background-color: #444444;
+
+}
+
+.delete-button:hover {
+    background-color: black;
+}
+
 .back-link {
     text-decoration: none;
-    color: black;
+    color: #444444;
     font-weight: bold;
 }
 
 .back-link:hover {
     text-decoration: underline;
+}
+
+
+.cancel-button {
+    padding: 10px 20px;
+    background-color: #555;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.cancel-button:hover {
+    background-color: #444;
 }
 
 /* create post form */

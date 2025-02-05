@@ -13,20 +13,31 @@
     </div>
 
     <div class="post-likes">
-    {% if user.is_authenticated %}
-      <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
-          {% csrf_token %}
-          <button type="submit" class="like-button {% if user_has_liked %}liked{% endif %}">
-            <i class="fas fa-thumbs-up"></i>  
-          </button>
-      </form>
-    {% else %}
-        <a href="{% url 'blog:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
-    {% endif %}
+      {% if user.is_authenticated %}
+        <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="like-button {% if user_has_liked %}liked{% endif %}">
+              <i class="fas fa-thumbs-up"></i>  
+            </button>
+        </form>
+      {% else %}
+          <a href="{% url 'blog:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
+      {% endif %}
 
-    <!-- Likes count separate from the button -->
-    <span id="likes-count">{{ post.likes }}</span> 
+      <!-- Likes count separate from the button -->
+      <span id="likes-count">{{ post.likes }}</span> 
+
+      <!-- edit or delete posts -->
+      {% if user == post.author %}
+        <div class="post-actions">
+            <a href="{% url 'blog:edit_post' post.slug %}" class="edit-button">Edit</a>
+            <a href="{% url 'blog:delete_post' post.slug %}" class="delete-button">Delete</a>
+        </div>
+      {% endif %}
+
     </div>
+
+
 
     <a href="#" onclick="if (!window.history.back()) window.location.href='/'; return false;" class="back-link">Back</a>
 

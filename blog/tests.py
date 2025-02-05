@@ -228,3 +228,71 @@ class URLTests(TestCase):
         """Test that the create post URL is correctly mapped."""
         url = reverse('blog:create_post')
         self.assertEqual(resolve(url).func, create_post)
+
+
+class PostUpdateViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.post = Post.objects.create(
+            title='Test Post',
+            content='This is a test post.',
+            author=self.user,
+            status='published',
+        )
+        self.client.login(username='testuser', password='testpass')
+
+    def test_edit_post_view_get(self):
+        """Test the GET request to the edit_post view."""
+        response = self.client.get(reverse('blog:edit_post', args=[self.post.slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Edit Post')
+
+    def test_edit_post_view_post(self):
+        """Test the POST request to the edit_post view."""
+        data = {
+            'title': 'Updated Post',
+            'content': 'This is an updated post.',
+            'status': 'published',
+        }
+        response = self.client.post(reverse('blog:edit_post', args=[self.post.slug]), data)
+        self.assertEqual(response.status_code, 302)  # Redirects to post detail
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.title, 'Updated Post')
+        self.assertEqual(self.post.content, 'This is an updated post.')
+
+    def test_edit_post_view_unauthorized(self):
+        """Test that non-authors cannot edit the post."""
+        other_user = User.objects.create_user(username='otheruser', password='testpass')
+        self.client.login(username='otheruser', password='testpass')
+        response = self.client.get(reverse('blog:edit_post', args=[self.post.slug]))
+        self.assertEqual(response.status_code, 403)  # Forbidden
+
+class PostDeleteViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.post = Post.objects.create(
+            title='Test Post',
+            content='This is a test post.',
+            author=self.user,
+            status='published',
+        )
+        self.client.login(username='testuser', password='testpass')
+
+    def test_delete_post_view_get(self):
+        """Test the GET request to the delete_post view."""
+        response = self.client.get(reverse('blog:delete_post', args=[self.post.slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Delete Post')
+
+    def test_delete_post_view_post(self):
+        """Test the POST request to the delete_post view."""
+        response = self.client.post(reverse('blog:delete_post', args=[self.post.slug]))
+        self.assertEqual(response.status_code, 302)  # Redirects to home page
+        self.assertFalse(Post.objects.filter(id=self.post.id).exists())
+
+    def test_delete_post_view_unauthorized(self):
+        """Test that non-authors cannot delete the post."""
+        other_user = User.objects.create_user(username='otheruser', password='testpass')
+        self.client.login(username='otheruser', password='testpass')
+        response = self.client.get(reverse('blog:delete_post', args=[self.post.slug]))
+        self.assertEqual(response.status_code, 403)  # Forbidden

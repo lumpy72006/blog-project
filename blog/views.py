@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, resolve_url, get_object_or_404
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from .models import Post
 from .forms import PostForm, SignupForm
@@ -30,8 +31,8 @@ class PostDetailView(DetailView):
         # Increment the views count for the post
         self.object.increment_views()
 
-
         return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         post = self.object
@@ -39,6 +40,26 @@ class PostDetailView(DetailView):
         context['reading_time'] = post.reading_time
         context['user_has_liked'] = self.request.user in post.liked_by.all()
         return context
+
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/edit_post.html'
+
+    def test_func(self):
+        """Ensure only the author can edit the post"""
+        post = self.get_object()
+        return self.request.user == post.author
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Post
+    template_name = 'blog/delete_post.html'
+    success_url = '/'  # Redirect to the home page after deletion
+
+    def test_func(self):
+        """Ensure only the author can delete the post."""
+        post = self.get_object()
+        return self.request.user == post.author
 
 def signup(request):
     if request.method == "POST":

@@ -1,0 +1,12 @@
+{% extends "blog/layout.html" %}
+
+{% block body %}
+<div class="edit-post-container">
+    <h1>Edit Post</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save-button">Save Changes</button>
+    </form>
+</div>
+{% endblock %}
