@@ -1,0 +1,12 @@
+asgiref==3.8.1
+certifi==2024.12.14
+distlib==0.3.9
+Django==5.1.5
+django-taggit==6.1.0
+packaging==24.2
+pillow==11.1.0
+pipenv==2024.4.0
+platformdirs==4.3.6
+pytz==2024.2
+sqlparse==0.5.3
+virtualenv==20.29.1
