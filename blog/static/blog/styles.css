@@ -34,6 +34,7 @@ header h1 a {
   padding: 10px 10px; /* Add padding around the link */
   border-radius: 15px; /* Rounded corners for the button */
   transition: background-color 0.3s; /* Smooth transition effect */
+
 }
 .nav-right button:hover {
 
@@ -98,7 +99,7 @@ header h1 a {
     padding: 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 2px;
     color: inherit; /* Same color as the page */
     text-decoration: none;
 }
@@ -149,32 +150,86 @@ header h1 a {
 
 }
 
-.edit-button, .delete-button {
-    padding: 10px 10px;
+.comment-section {
+    display: flex;
+    align-items: center;
+    gap: 1px; /* Adjust spacing */
+}
+
+.comment-button {
+    background-color: white;
+    color: #444444;
     border: none;
+    margin-left: 10px;
+}
+.comment-button svg {
+    width: 18px;  /* Adjust to preferred size */
+    height: 18px;
+    pointer-events: none;
+}
+
+.comment-popup {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.comment-popup p a {
+    color: green;
+}
+
+.comment-popup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.comment-content {
+    margin: 0;
+}
+
+.comment-meta {
+    font-size: 0.8em;
+    color: #666;
+}
+
+.no-comments {
+    color: #999;
+    font-style: italic;
+}
+
+
+ .edit-button, .delete-button {
+    padding: 10px 10px;
     border-radius: 5px;
     cursor: pointer;
     text-decoration: none;
-    color: white;
-
+    color: #444444;
 }
 
-.edit-button {
-    background-color: #4CAF50; /* Green */
+.edit-button:hover, .delete-button:hover {
+    background-color: #D3D3D3;
 }
 
-.edit-button:hover {
-    background-color: #45a049;
-}
 
-.delete-button {
-    background-color: #444444;
-
-}
-
-.delete-button:hover {
-    background-color: black;
-}
 
 .back-link {
     text-decoration: none;

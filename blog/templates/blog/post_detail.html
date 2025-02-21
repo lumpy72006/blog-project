@@ -6,13 +6,14 @@
     <h6 class="post-meta">
         <span class="post-author">{{ post.author|title }}</span>
         <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
-        <span class="reading-time">{{ post.reading_time }} min read</span>
+        <span class="reading-time">{{ reading_time }} min read</span>
     </h6>
     <div class="post-content" style="white-space: pre-wrap;">
         {{ post.content }}
     </div>
 
     <div class="post-likes">
+      <!-- Like Button -->
       {% if user.is_authenticated %}
         <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
             {% csrf_token %}
@@ -25,59 +26,115 @@
       {% endif %}
 
       <!-- Likes count separate from the button -->
-      <span id="likes-count">{{ post.likes }}</span> 
+      <span id="likes-count">{{ likes }}</span> 
+
+      <!-- Comment button and no of comments -->
+      <div class="comment-section">
+        <button id="comment-button" class="comment-button">
+          {% include './icons/icons8-comment.svg' %}
+        </button>
+        <!-- Comments count -->
+        <span id="comments-count">{{ comments.count }}</span>
+      </div>
 
       <!-- edit or delete posts -->
       {% if user == post.author %}
         <div class="post-actions">
-            <a href="{% url 'blog:edit_post' post.slug %}" class="edit-button">Edit</a>
+            <a href="{% url 'blog:edit_post' post.slug %}" class="edit-button" title="edit post">
+              {% include './icons/pencil-fill.svg' %}
+            </a>
             <a href="{% url 'blog:delete_post' post.slug %}" class="delete-button">Delete</a>
         </div>
       {% endif %}
-
     </div>
 
+    <!-- Comment Dropdown/Popup -->
+    <div id="comment-popup" class="comment-popup">
+      <div class="comment-popup-content">
+          <!-- Comment Form -->
+          {% if user.is_authenticated %}
+            <form id="comment-form" action="{% url 'blog:comment' post.slug %}" method="post">
+              {% csrf_token %}
+              {{ comment_form.content }}
+              <button type="submit" class="submit-comment-button">Comment</button>
+            </form>
+          {% else %}
+            <p>You must be <a href="{% url 'blog:login' %}?next={{ request.path }}">logged in</a> to comment.</p>
+          {% endif %}
 
+          <!-- List of Comments -->
+          <div class="comments-list">
+            {% if comments.all %}
+              {% for comment in comments.all %}
+                <div class="comment">
+                  <p class="comment-content">{{ comment.content }}</p>
+                  <p class="comment-meta">By {{ comment.author }} on {{ comment.created_date|date:"F d, Y H:i" }}</p>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p class="no-comments">No comments yet. Be the first to comment!</p>
+            {% endif %}
+          </div>
+      </div>
+    </div>
 
     <a href="#" onclick="if (!window.history.back()) window.location.href='/'; return false;" class="back-link">Back</a>
 
 </div>
 
+<!-- JavaScript for Like and Comment Functionality -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const likeButton = document.querySelector('.like-button');
-        const likesCount = document.getElementById('likes-count');
+        // Like Button Functionality
         const likeForm = document.getElementById('like-form');
+        if (likeForm) {
+            likeForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent form submission
 
-        likeForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent form submission
-
-            fetch(likeForm.action, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({
-                    'post_slug': '{{ post.slug }}',
+                fetch(likeForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        'post_slug': '{{ post.slug }}',
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Update like count and button style
-                likesCount.textContent = data.likes;
-                if (data.user_has_liked) {
-                    likeButton.classList.add('liked');
-                } else {
-                    likeButton.classList.remove('liked');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                .then(response => response.json())
+                .then(data => {
+                    // Update like count and button style
+                    document.getElementById('likes-count').textContent = data.likes;
+                    const likeButton = document.querySelector('.like-button');
+                    if (data.user_has_liked) {
+                        likeButton.classList.add('liked');
+                    } else {
+                        likeButton.classList.remove('liked');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             });
+        };
+
+        // Comment Button Functionality
+        const commentButton = document.getElementById('comment-button');
+        const commentPopup = document.getElementById('comment-popup');
+
+        commentButton.addEventListener('click', function() {
+            commentPopup.style.display = commentPopup.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close the popup if clicked outside
+        window.addEventListener('click', function(event) {
+            if (event.target !== commentButton && !commentPopup.contains(event.target)) {
+                commentPopup.style.display = 'none';
+            }
         });
     });
 </script>
+
 
 {% endblock %}
 
