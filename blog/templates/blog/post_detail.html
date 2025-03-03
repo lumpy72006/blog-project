@@ -18,7 +18,7 @@
         <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
             {% csrf_token %}
             <button type="submit" class="like-button {% if user_has_liked %}liked{% endif %}">
-              <i class="fas fa-thumbs-up"></i>  
+              <i class="fas fa-thumbs-up"></i>
             </button>
         </form>
       {% else %}
@@ -26,7 +26,7 @@
       {% endif %}
 
       <!-- Likes count separate from the button -->
-      <span id="likes-count">{{ likes }}</span> 
+      <span id="likes-count">{{ likes }}</span>
 
       <!-- Comment button and no of comments -->
       <div class="comment-section">
@@ -137,4 +137,3 @@
 
 
 {% endblock %}
-
