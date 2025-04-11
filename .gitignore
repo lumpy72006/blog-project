@@ -15,6 +15,7 @@ env/
 
 # Media and static files
 media/
+featured_images/
 staticfiles/
 
 # IDE and system files

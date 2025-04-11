@@ -1,12 +1,16 @@
 {% extends "blog/layout.html" %}
+{% load django_bootstrap5 %}
 
 {% block body %}
 <div class="edit-post-container">
     <h1>Edit Post</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="save-button">Save Changes</button>
+        {% bootstrap_form form %}
+        <div class="form-actions">
+            {% bootstrap_button button_type='submit' content='Update Post' %}
+            <a href="{% url 'blog:post_detail' post.slug %}" class="cancel-button">Cancel</a>
+        </div>
     </form>
 </div>
 {% endblock %}

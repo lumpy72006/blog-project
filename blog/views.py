@@ -1,8 +1,9 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from .forms import CommentForm, PostForm, SignupForm
@@ -43,7 +44,7 @@ class PostDetailView(DetailView):
         context["likes"] = post.likes
         context["reading_time"] = post.reading_time
         context["user_has_liked"] = self.request.user in post.liked_by.all()
-        context["comments"] = post.comments.filter(approved=True)
+        context["comments"] = post.comments.filter(approved=True).order_by('-created_date')
         context["comment_form"] = CommentForm()
 
         return context
@@ -145,8 +146,12 @@ def comment(request, slug):
             comment.author = request.user
             comment.save()
 
-            return redirect("blog:post_detail", slug=post.slug)
-    else:
-        form = CommentForm()
+            return JsonResponse({
+                'success': True,
+                'author': request.user.username,
+                'created_date': comment.created_date.strftime("%B %d, %Y %H:%M"),
+                'content': comment.content,
+                'comments_count': post.comments.filter(approved=True).count()
+            })
 
-    return render(request, "blog/post_detail.html", {"form": form})
+    return JsonResponse({'success': False}, status=400)

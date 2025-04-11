@@ -1,4 +1,5 @@
 {% extends "blog/layout.html" %}
+{% load static %}
 
 {% block body %}
 <div class="post-detail-container">
@@ -12,128 +13,78 @@
         {{ post.content }}
     </div>
 
-    <div class="post-likes">
-      <!-- Like Button -->
-      {% if user.is_authenticated %}
-        <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="like-button {% if user_has_liked %}liked{% endif %}">
-              <i class="fas fa-thumbs-up"></i>
-            </button>
-        </form>
-      {% else %}
-          <a href="{% url 'blog:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
-      {% endif %}
+    <div class="post-actions-container">
+        <div class="post-likes">
+            <!-- Like Button -->
+            {% if user.is_authenticated %}
+                <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="like-button {% if user_has_liked %}liked{% endif %}">
+                        <i class="fas fa-thumbs-up"></i>
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'blog:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
+            {% endif %}
 
-      <!-- Likes count separate from the button -->
-      <span id="likes-count">{{ likes }}</span>
+            <!-- Likes count separate from the button -->
+            <span id="likes-count">{{ likes }}</span>
 
-      <!-- Comment button and no of comments -->
-      <div class="comment-section">
-        <button id="comment-button" class="comment-button">
-          {% include './icons/icons8-comment.svg' %}
-        </button>
-        <!-- Comments count -->
-        <span id="comments-count">{{ comments.count }}</span>
-      </div>
+            <!-- Comment svg and no of comments -->
+            <div class="comment-like-svgs">
+                <span id="comment-button" class="comment-button">
+                    {% include './icons/icons8-comment.svg' %}
+                </span>
+                <span id="comments-count">{{ comments.count }}</span>
+            </div>
+        </div>
 
-      <!-- edit or delete posts -->
-      {% if user == post.author %}
-        <div class="post-actions">
-            <a href="{% url 'blog:edit_post' post.slug %}" class="edit-button" title="edit post">
-              {% include './icons/pencil-fill.svg' %}
-            </a>
+        <!-- edit or delete posts - moved to bottom right -->
+        {% if user == post.author %}
+        <div class="post-author-actions">
+            <a href="{% url 'blog:edit_post' post.slug %}" class="edit-button" >Edit</a>
             <a href="{% url 'blog:delete_post' post.slug %}" class="delete-button">Delete</a>
         </div>
-      {% endif %}
+        {% endif %}
     </div>
 
-    <!-- Comment Dropdown/Popup -->
-    <div id="comment-popup" class="comment-popup">
-      <div class="comment-popup-content">
-          <!-- Comment Form -->
-          {% if user.is_authenticated %}
-            <form id="comment-form" action="{% url 'blog:comment' post.slug %}" method="post">
-              {% csrf_token %}
-              {{ comment_form.content }}
-              <button type="submit" class="submit-comment-button">Comment</button>
-            </form>
-          {% else %}
-            <p>You must be <a href="{% url 'blog:login' %}?next={{ request.path }}">logged in</a> to comment.</p>
-          {% endif %}
+    <!-- Comment Form at the bottom -->
+    <div class="comments-section">
+        <div class="comments-section" id="comments-section">
+            <h3>Comments (<span id="comments-count-display">{{ comments.count }}</span>)</h3>
 
-          <!-- List of Comments -->
-          <div class="comments-list">
-            {% if comments.all %}
-              {% for comment in comments.all %}
-                <div class="comment">
-                  <p class="comment-content">{{ comment.content }}</p>
-                  <p class="comment-meta">By {{ comment.author }} on {{ comment.created_date|date:"F d, Y H:i" }}</p>
-                </div>
-              {% endfor %}
+            {% if user.is_authenticated %}
+            <form id="comment-form" class="comment-form" 
+                  action="{% url 'blog:comment' post.slug %}" method="post">
+                {% csrf_token %}
+                <textarea name="content" class="form-control comment-input" rows="3" 
+                         placeholder="Share your thoughts..." required></textarea>
+                <button type="submit" class="submit-comment-button">Post Comment</button>
+            </form>
             {% else %}
-              <p class="no-comments">No comments yet. Be the first to comment!</p>
+            <p>Please <a href="{% url 'blog:login' %}?next={{ request.path }}">log in</a> to comment.</p>
             {% endif %}
-          </div>
-      </div>
+
+            <!-- List of Comments -->
+            <div class="comments-list" id="comments-list">
+                {% for comment in comments %}
+                <div class="comment">
+                    <p class="comment-meta">
+                        <span class="comment-author">{{ comment.author }}</span> 
+                        on {{ comment.created_date|date:"F d, Y H:i" }}
+                    </p>
+                    <p class="comment-content">{{ comment.content }}</p>
+                </div>
+                {% empty %}
+                <p class="no-comments">No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
     <a href="#" onclick="if (!window.history.back()) window.location.href='/'; return false;" class="back-link">Back</a>
-
 </div>
 
-<!-- JavaScript for Like and Comment Functionality -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Like Button Functionality
-        const likeForm = document.getElementById('like-form');
-        if (likeForm) {
-            likeForm.addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevent form submission
-
-                fetch(likeForm.action, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify({
-                        'post_slug': '{{ post.slug }}',
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Update like count and button style
-                    document.getElementById('likes-count').textContent = data.likes;
-                    const likeButton = document.querySelector('.like-button');
-                    if (data.user_has_liked) {
-                        likeButton.classList.add('liked');
-                    } else {
-                        likeButton.classList.remove('liked');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            });
-        };
-
-        // Comment Button Functionality
-        const commentButton = document.getElementById('comment-button');
-        const commentPopup = document.getElementById('comment-popup');
-
-        commentButton.addEventListener('click', function() {
-            commentPopup.style.display = commentPopup.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Close the popup if clicked outside
-        window.addEventListener('click', function(event) {
-            if (event.target !== commentButton && !commentPopup.contains(event.target)) {
-                commentPopup.style.display = 'none';
-            }
-        });
-    });
-</script>
-
+<script src="{% static 'blog/js/post_detail.js' %}"></script>
 
 {% endblock %}
