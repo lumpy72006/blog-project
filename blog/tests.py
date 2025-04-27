@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.http import response
 from django.test import TestCase, RequestFactory
 from .models import Post, Comment
 from django.template import Template, Context
@@ -299,6 +300,12 @@ class SearchFunctionalityTests(TestCase):
         self.assertContains(response, self.post1.title)
         self.assertNotContains(response, self.post2.title)
 
+    def test_search_by_tags(self):
+        """Test that posts can be searched with tags"""
+        self.post1.tags.add('django', 'testing')
+        response = self.client.get(reverse('blog:search') +'?query=django')
+        self.assertContains(response, self.post1.title)
+
     def test_empty_search_returns_nothing(self):
         """Test empty search query returns no results"""
         response = self.client.get(reverse('blog:search') + '?query=')
@@ -322,6 +329,7 @@ class SearchFunctionalityTests(TestCase):
         self.assertIn('post_list', response.context)
         self.assertEqual(len(response.context['post_list']), 1)
         self.assertEqual(response.context['post_list'][0], self.post1)
+
 
 class SearchTemplateTagTests(TestCase):
     def setUp(self):
