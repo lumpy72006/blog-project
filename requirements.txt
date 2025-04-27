@@ -1,6 +1,10 @@
 asgiref==3.8.1
-Django==5.1.5
+Django==5.1.6
+django-bootstrap5==25.1
+django-stubs==5.1.3
+django-stubs-ext==5.1.3
 django-taggit==6.1.0
 pillow==11.1.0
-pytz==2024.2
 sqlparse==0.5.3
+types-PyYAML==6.0.12.20241230
+typing_extensions==4.12.2
