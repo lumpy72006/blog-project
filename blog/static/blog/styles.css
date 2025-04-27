@@ -13,6 +13,7 @@ body {
 header {
     border-bottom: 1px solid #ddd;
     margin-bottom: 2rem;
+    margin-top: 2rem;
     display: flex;
     justify-content: space-between;
     /* Distributes space between elements */
@@ -28,32 +29,54 @@ header h1 a {
     font-weight: bold;
 }
 
-.nav-right button,
-.nav-right a {
+.nav-center {
+    flex-grow: 1;
+    margin: 0 2rem;
+}
+
+.search-form {
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px 0 0 4px;
+}
+
+.search-button {
+    padding: 0.5rem 1rem;
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+.nav-right button {
     border-width: 1px;
     border: none;
+    font-size: 10px;
+    padding: 5px 10px;
+    border-radius: 15px;
+    transition: background-color 0.3s;
+}
+
+.nav-right button a,
+.nav-right-logout {
     color: green;
     text-decoration: none;
-    /* Remove underline */
-    font-size: 10px;
-    /* Set font size for the link */
-    padding: 10px 10px;
-    /* Add padding around the link */
-    border-radius: 15px;
-    /* Rounded corners for the button */
-    transition: background-color 0.3s;
-    /* Smooth transition effect */
-
+    display: inline-block;
 }
 
 /* Posts */
 .post-link {
     text-decoration: none;
-    /* Remove underline from the link */
     color: inherit;
-    /* Inherit text color from the parent */
     display: block;
-    /* Make the link a block-level element */
 }
 
 .post-link:hover .post-container {
@@ -69,43 +92,29 @@ header h1 a {
 
 .post-container {
     margin: 20px 0;
-    /* Add spacing between posts */
     padding: 15px;
-    /* Add padding inside each post */
     border: 1px solid #ddd;
-    /* Light border around each post */
     border-radius: 10px;
-    /* Rounded corners for better aesthetics */
     background-color: #f9f9f9;
-    /* Light background color */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    /* Subtle shadow for depth */
 }
 
 .post-container h2 a {
     color: black;
-    /* Change link color to black */
     text-decoration: none;
-    /* Remove underline */
 }
 
 .post-container h6 {
     margin-bottom: 10px;
     color: #555;
-    /* Slightly lighter text color for author/date */
 }
 
 .author-date {
     display: flex;
     gap: 10px;
-    /* Adds spacing between the elements */
-
-
-    /* Post Detail Page */
 }
 
 .post-likes {
-
     margin-top: 20px;
     display: flex;
     align-items: center;
@@ -113,7 +122,6 @@ header h1 a {
     font-size: 0.7rem;
     color: #777777;
     margin-bottom: 5px;
-
 }
 
 .like-button {
@@ -125,13 +133,11 @@ header h1 a {
     align-items: center;
     gap: 2px;
     color: inherit;
-    /* Same color as the page */
     text-decoration: none;
 }
 
 .like-button.liked {
     color: #4CAF50;
-    /* Change the color when liked */
 }
 
 .like-button:hover {

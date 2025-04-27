@@ -4,11 +4,12 @@ from django.contrib.auth.views import LoginView, LogoutView
 from .views import (
     IndexView,
     PostDetailView,
-    create_post,
+    PostCreateView,
     signup,
     like_post,
     PostUpdateView,
     PostDeleteView,
+    SearchView,
     comment,
 )
 
@@ -22,7 +23,8 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path("new-post/", create_post, name="create_post"),
+    path("search/", SearchView.as_view(), name="search"),
+    path("new-post/", PostCreateView.as_view(), name="create_post"),
     path("<slug:slug>/", PostDetailView.as_view(), name="post_detail"),
     path("<slug:slug>/edit/", PostUpdateView.as_view(), name="edit_post"),
     path("<slug:slug>/delete/", PostDeleteView.as_view(), name="delete_post"),

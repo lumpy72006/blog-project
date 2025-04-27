@@ -1,12 +1,13 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
-from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.db.models import Q
 
-from .forms import CommentForm, PostForm, SignupForm
+from .forms import CommentForm, PostForm, SignupForm, SearchForm
 from .models import Post
 
 
@@ -50,6 +51,21 @@ class PostDetailView(DetailView):
         return context
 
 
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post 
+    form_class = PostForm
+    template_name = "blog/create_post.html"
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        response = super().form_valid(form)
+
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy("blog:post_detail", kwargs={'slug':self.object.slug})
+
+
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
@@ -73,6 +89,30 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
         return self.request.user == post.author
 
+class SearchView(ListView):
+    template_name = "blog/search_results.html"
+    context_object_name = "post_list"
+    paginate_by = 10
+
+    def get_queryset(self):
+        query = self.request.GET.get('query', '')
+        if query:
+            return Post.objects.filter(
+                Q(status="published") &
+                (Q(title__icontains=query) |
+                 Q(content__icontains=query) |
+                 Q(author__username__icontains=query) |
+                 Q(tags__name__icontains=query))
+            ).distinct().order_by("pub_date")
+
+        return Post.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('query', '')
+        context['form'] = SearchForm(self.request.GET)
+        return context
+    
 
 def signup(request):
     if request.method == "POST":
@@ -90,40 +130,16 @@ def signup(request):
 
 
 @login_required
-def create_post(request):
-    if request.method == "POST":
-        # Include request.FILES for file uploads
-        form = PostForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            post = form.save(commit=False)
-            # Set the author to the logged-in user
-            post.author = request.user
-            post.save()
-            form.save_m2m()  # Save many-to-many data for the form (e.g., tags)
-
-            return redirect("blog:post_detail", slug=post.slug)
-    else:
-        form = PostForm()
-
-    return render(request, "blog/create_post.html", {"form": form})
-
-
-@login_required
 def like_post(request, slug):
     post = get_object_or_404(Post, slug=slug)
 
     if request.user in post.liked_by.all():
-        # user already liked the post, so unlike it
         post.liked_by.remove(request.user)
         post.likes -= 1
     else:
-        # user is liking the post
         post.liked_by.add(request.user)
         post.likes += 1
     post.save()
-
-    # Return updated like count and a flag for whether the user has liked it
 
     return JsonResponse(
         {

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.forms import fields
 from django.urls import reverse
 from django.utils.text import slugify
 from taggit.managers import TaggableManager
@@ -38,6 +39,8 @@ class Post(models.Model):
             models.Index(fields=["slug"], name="slug_idx"),
             models.Index(fields=["pub_date"], name="pub_date_idx"),
             models.Index(fields=["status"], name="status_idx"),
+            models.Index(fields=["title"], name="title_idx"),
+            models.Index(fields=["content"], name="content_idx"),
         ]
 
     def get_absolute_url(self):
