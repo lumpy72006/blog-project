@@ -1,27 +1,8 @@
 {% extends 'blog/layout.html' %}
-{% load django_bootstrap5 %}
 
 {% block body %}
-  
-    {% if form.errors %}
-      <div>
-          <p>Please correct the following errors:</p>
-          <ul>
-              {% for field in form %}
-                  {% for error in field.errors %}
-                      <li>{{ field.label }}: {{ error }}</li>
-                  {% endfor %}
-              {% endfor %}
-          </ul>
-      </div>
-    {% endif %}
-    <ul>
-    <form method="post" class="create-post-form">
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        {% bootstrap_button button_type='submit' content='Create Post' %}
-    </form>
-    </ul>
-
+  <div class="create-post-container">
+    <h1>Create Post</h1>
+    {% include 'blog/_post_form.html' with submit_text='Create Post' cancel_url=cancel_url %}
+  </div>
 {% endblock %}
-

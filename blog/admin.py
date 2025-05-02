@@ -4,16 +4,13 @@ from .models import Post, Comment
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ["title", "author", "status", "pub_date", "views_count", "tag_list"]
+    list_display = ["title", "author", "status", "pub_date", "views_count"]
     search_fields = ["title", "content"]
     list_filter = ["status", "pub_date"]
     prepopulated_fields = {"slug": ("title",)}
     exclude = ("views_count", "reading_time", "likes", "liked_by")
-    autocomplete_fields = ("tags",)
     list_editable = ["status"]
 
-    def tag_list(self, obj):
-        return ", ".join(obj.tags.names())
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):

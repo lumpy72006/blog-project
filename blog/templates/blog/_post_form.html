@@ -1,0 +1,40 @@
+{% load django_bootstrap5 %}
+
+{% if form.errors %}
+  <div>
+      <p>Please correct the following errors:</p>
+      <ul>
+          {% for field in form %}
+              {% for error in field.errors %}
+                  <li>{{ field.label }}: {{ error }}</li>
+              {% endfor %}
+          {% endfor %}
+      </ul>
+  </div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="post-form">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+    </div>
+
+    <div class="mb-3">
+        <input id="content" type="hidden" name="content" value="{{ form.content.value|default:'' }}">
+        <trix-editor input="content" class="form-control trix-content"></trix-editor>
+    </div>
+
+    <div class="mb-3">
+        {{ form.status.label_tag }}
+        {{ form.status }}
+    </div>
+
+    {% bootstrap_button button_type='submit' content=submit_text %}
+    {% if cancel_url %}
+        <a href="{{ cancel_url }}" class="btn btn-secondary ms-2">Cancel</a>
+    {% endif %}
+</form>
+
+{% include 'blog/_trix_upload_script.html' %}

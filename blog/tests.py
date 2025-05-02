@@ -300,11 +300,6 @@ class SearchFunctionalityTests(TestCase):
         self.assertContains(response, self.post1.title)
         self.assertNotContains(response, self.post2.title)
 
-    def test_search_by_tags(self):
-        """Test that posts can be searched with tags"""
-        self.post1.tags.add('django', 'testing')
-        response = self.client.get(reverse('blog:search') +'?query=django')
-        self.assertContains(response, self.post1.title)
 
     def test_empty_search_returns_nothing(self):
         """Test empty search query returns no results"""

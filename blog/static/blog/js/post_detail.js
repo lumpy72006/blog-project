@@ -31,6 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
+        const trixEditor = commentForm.querySelector('trix-editor');
+        if (trixEditor) {
+            trixEditor.addEventListener('trix-file-accept', function(e) {
+                e.preventDefault(); // Prevent file attachments
+            });
+        }
+
         commentForm.addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -46,10 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Clear the textarea
-                        commentForm.querySelector('textarea').value = '';
+                        // Clear Trix editor content and hidden input
+                        document.getElementById('comment-content').value = '';
+                        if (trixEditor) {
+                            trixEditor.editor.loadHTML('');
+                        }
 
-                        // Update comments count in both places
+                        // Update comments count
                         const newCount = parseInt(document.getElementById('comments-count').textContent) + 1;
                         document.getElementById('comments-count').textContent = newCount;
                         document.getElementById('comments-count-display').textContent = newCount;

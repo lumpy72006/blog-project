@@ -1,9 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.forms import fields
 from django.urls import reverse
 from django.utils.text import slugify
-from taggit.managers import TaggableManager
 
 
 # Create your models here.
@@ -23,14 +21,9 @@ class Post(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     pub_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
-    tags = TaggableManager()
-    featured_image = models.ImageField(
-        upload_to="featured_images/", blank=True, null=True
-    )
     views_count = models.PositiveIntegerField(default=0)  # Tracks post views
     likes = models.PositiveIntegerField(default=0)
     liked_by = models.ManyToManyField(User, related_name="liked_posts", blank=True)
-    featured = models.BooleanField(default=False)
     reading_time = models.PositiveIntegerField(default=0)
 
     class Meta:

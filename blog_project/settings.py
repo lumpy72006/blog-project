@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +38,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "taggit",
     "blog.apps.BlogConfig",
     "django_bootstrap5",
 ]
@@ -128,3 +128,6 @@ LOGOUT_REDIRECT_URL = "blog:index"
 LOGIN_URL = (
     "blog:login"  # This is where users will be redirected if they are not logged in
 )
+
+MEDIA_URL ='/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

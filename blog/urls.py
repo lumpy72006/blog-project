@@ -11,6 +11,7 @@ from .views import (
     PostDeleteView,
     SearchView,
     comment,
+    trix_upload,
 )
 
 app_name = "blog"
@@ -25,6 +26,7 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(), name="logout"),
     path("search/", SearchView.as_view(), name="search"),
     path("new-post/", PostCreateView.as_view(), name="create_post"),
+    path("trix-upload/", trix_upload, name="trix_upload"),
     path("<slug:slug>/", PostDetailView.as_view(), name="post_detail"),
     path("<slug:slug>/edit/", PostUpdateView.as_view(), name="edit_post"),
     path("<slug:slug>/delete/", PostDeleteView.as_view(), name="delete_post"),

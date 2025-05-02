@@ -1,11 +1,16 @@
+import os
+import uuid
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import default_storage
 
 from .forms import CommentForm, PostForm, SignupForm, SearchForm
 from .models import Post
@@ -56,6 +61,11 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     form_class = PostForm
     template_name = "blog/create_post.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = self.request.META.get('HTTP_REFERER', reverse_lazy('blog:index'))
+        return context
+
     def form_valid(self, form):
         form.instance.author = self.request.user
         response = super().form_valid(form)
@@ -101,8 +111,7 @@ class SearchView(ListView):
                 Q(status="published") &
                 (Q(title__icontains=query) |
                  Q(content__icontains=query) |
-                 Q(author__username__icontains=query) |
-                 Q(tags__name__icontains=query))
+                 Q(author__username__icontains=query))
             ).distinct().order_by("pub_date")
 
         return Post.objects.none()
@@ -113,6 +122,23 @@ class SearchView(ListView):
         context['form'] = SearchForm(self.request.GET)
         return context
     
+
+@csrf_exempt
+def trix_upload(request):
+    if request.method == 'POST':
+        file = request.FILES.get('file')
+        if file:
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, 'uploads'), exist_ok=True)
+
+            #Generate unique filename to prevent collisions
+            file_ext = os.path.splitext(file.name)[1]
+            file_name = f"{uuid.uuid4()}{file_ext}"
+            file_path = default_storage.save(f"uploads/{file_name}", file)
+
+            file_url = f"{settings.MEDIA_URL}{file_path}"
+            return JsonResponse({'url': file_url})
+    return JsonResponse({'error': 'Upload failed'}, status=400)
+
 
 def signup(request):
     if request.method == "POST":

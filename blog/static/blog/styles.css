@@ -44,7 +44,7 @@ header h1 a {
     flex-grow: 1;
     padding: 0.5rem;
     border: 1px solid #ced4da;
-    border-radius: 4px 0 0 4px;
+    border-radius: 18px 0 0 18px;
 }
 
 .search-button {
@@ -52,7 +52,7 @@ header h1 a {
     background-color: green;
     color: white;
     border: none;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 18px 18px 0;
     cursor: pointer;
 }
 
@@ -376,9 +376,6 @@ header h1 a {
     text-align: right;
 }
 
-
-
-
 .edit-button,
 .delete-button {
     padding: 10px 10px;
@@ -386,4 +383,9 @@ header h1 a {
     cursor: pointer;
     text-decoration: none;
     color: #444444;
+}
+
+/* Hide attachment button in comment Trix editor */
+.comment-form trix-toolbar .trix-button-group--file-tools {
+    display: none !important;
 }

@@ -1,0 +1,71 @@
+<script>
+document.addEventListener("trix-attachment-add", function(event) {
+  const attachment = event.attachment;
+  if (attachment.file && !event.target.closest('.comment-form')) {
+    setSubmitDisabled(true); // Disable on new upload
+    uploadAttachment(attachment);
+  }
+});
+
+function uploadAttachment(attachment) {
+  const file = attachment.file;
+  const form = new FormData();
+  form.append("file", file);
+
+  fetch("{% url 'blog:trix_upload' %}", {
+    method: "POST",
+    body: form,
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+    },
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.url) {
+      attachment.setAttributes({
+        url: data.url,
+        href: data.url
+      });
+    }
+  })
+  .catch(error => {
+    console.error("Upload failed:", error);
+  })
+  .finally(() => {
+    checkIfUploadsComplete();
+  });
+}
+
+function checkIfUploadsComplete() {
+  const editor = document.querySelector("trix-editor");
+  const attachments = editor.editor.getDocument().getAttachments();
+
+  const pendingUploads = Array.from(attachments).filter(att => {
+    return att.file && !att.getAttribute("url");
+  });
+
+  setSubmitDisabled(pendingUploads.length > 0);
+}
+
+function setSubmitDisabled(disabled) {
+  const submitBtn = document.querySelector("form.create-post-form button[type='submit']");
+  if (submitBtn) {
+    submitBtn.disabled = disabled;
+    submitBtn.textContent = disabled ? "Uploading..." : "Create Post";
+  }
+}
+
+// Prevent submission if uploads are pending
+document.querySelector("form.create-post-form")?.addEventListener("submit", function (event) {
+  const editor = this.querySelector("trix-editor");
+  if (!editor) return;
+
+  const attachments = editor.editor.getDocument().getAttachments();
+  const pendingUploads = Array.from(attachments).filter(att => att.file && !att.getAttribute("url"));
+
+  if (pendingUploads.length > 0) {
+    event.preventDefault();
+    alert("Please wait for all files to finish uploading before submitting.");
+  }
+});
+</script>

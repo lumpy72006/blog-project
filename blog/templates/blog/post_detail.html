@@ -9,8 +9,8 @@
         <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
         <span class="reading-time">{{ reading_time }} min read</span>
     </h6>
-    <div class="post-content" style="white-space: pre-wrap;">
-        {{ post.content }}
+    <div class="post-content trix-content">
+        {{ post.content|safe }}
     </div>
 
     <div class="post-actions-container">
@@ -57,8 +57,8 @@
             <form id="comment-form" class="comment-form" 
                   action="{% url 'blog:comment' post.slug %}" method="post">
                 {% csrf_token %}
-                <textarea name="content" class="form-control comment-input" rows="3" 
-                         placeholder="Share your thoughts..." required></textarea>
+                <input type="hidden" id="comment-content" name="content" value="">
+                <trix-editor input="comment-content" class="trix-content form-control" placeholder="Share your thoughts..."></trix-editor>
                 <button type="submit" class="submit-comment-button">Post Comment</button>
             </form>
             {% else %}
@@ -73,7 +73,7 @@
                         <span class="comment-author">{{ comment.author }}</span> 
                         on {{ comment.created_date|date:"F d, Y H:i" }}
                     </p>
-                    <p class="comment-content">{{ comment.content }}</p>
+                    <p class="comment-content">{{ comment.content|safe }}</p>
                 </div>
                 {% empty %}
                 <p class="no-comments">No comments yet. Be the first to comment!</p>
@@ -85,6 +85,7 @@
     <a href="#" onclick="if (!window.history.back()) window.location.href='/'; return false;" class="back-link">Back</a>
 </div>
 
+{% include "blog/_trix_upload_script.html" %}
 <script src="{% static 'blog/js/post_detail.js' %}"></script>
 
 {% endblock %}

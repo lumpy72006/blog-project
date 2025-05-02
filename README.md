@@ -19,7 +19,6 @@ A full-featured blogging platform with authentication, post management, and adva
   - Post titles
   - Content
   - Author names (username)
-  - Tags
 - **Smart visibility**:
   - Hidden on auth/management pages
   - Only shows published posts
@@ -27,7 +26,6 @@ A full-featured blogging platform with authentication, post management, and adva
 ### Engagement Features
 - Post likes
 - View counters
-- Tagging system
 
 ## Technical Stack
 - **Backend**: Django 5.1
