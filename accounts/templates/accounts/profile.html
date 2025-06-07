@@ -1,0 +1,46 @@
+{% extends 'blog/layout.html' %}
+{% load static %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="avatar-container">
+            {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}'s Avatar" class="profile-avatar">
+            {% else %}
+                <img src="{% static 'blog/images/default-avatar.png' %}" alt="Default Avatar" class="profile-avatar">
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            <button class="edit-profile-btn">Edit profile</button>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-section">
+            <h2>Popular posts</h2>
+            <div class="post-list">
+                {% for post in posts %}
+                    <a href="{{ post.get_absolute_url }}" class="post-link">
+                        <div class="post-card">
+                            <div class="post-header">
+                                <h3 class="profile-section-post-title">{{ post.title|safe }}</h3>
+                                <span class="post-status {% if post.status == 'published' %}published{% else %}draft{% endif %}">
+                                    {{ post.status|title }}
+                                </span>
+                            </div>
+                            <p class="post-description">{{ post.content|striptags|truncatewords:15|safe }}</p>
+                            <div class="post-meta">
+                                <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
+                            </div>
+                        </div>
+                    </a>
+                {% empty %}
+                    <p>No posts available.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

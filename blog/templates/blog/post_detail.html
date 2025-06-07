@@ -24,7 +24,7 @@
                     </button>
                 </form>
             {% else %}
-                <a href="{% url 'blog:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
+                <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
             {% endif %}
 
             <!-- Likes count separate from the button -->
@@ -62,7 +62,7 @@
                 <button type="submit" class="submit-comment-button">Post Comment</button>
             </form>
             {% else %}
-            <p>Please <a href="{% url 'blog:login' %}?next={{ request.path }}">log in</a> to comment.</p>
+            <p>Please <a href="{% url 'accounts:login' %}?next={{ request.path }}">log in</a> to comment.</p>
             {% endif %}
 
             <!-- List of Comments -->

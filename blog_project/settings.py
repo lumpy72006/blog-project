@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "blog.apps.BlogConfig",
+    "accounts.apps.AccountsConfig",
     "django_bootstrap5",
 ]
 
@@ -126,7 +127,7 @@ STATIC_URL = "/static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGOUT_REDIRECT_URL = "blog:index"
 LOGIN_URL = (
-    "blog:login"  # This is where users will be redirected if they are not logged in
+    "accounts:login"  # This is where users will be redirected if they are not logged in
 )
 
 MEDIA_URL ='/media/'

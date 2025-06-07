@@ -11,6 +11,6 @@
       <input type="hidden" name="next" value="{{ request.GET.next }}">
       {% bootstrap_button button_type='submit' content='Login' %}
   </form>
-  <p>Don't have an account? <a href="{% url 'blog:signup' %}">Signup</a></p>
+  <p>Don't have an account? <a href="{% url 'accounts:signup' %}">Signup</a></p>
 </div>
 {% endblock %}

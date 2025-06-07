@@ -1,11 +1,9 @@
 from django.urls import path
-from django.contrib.auth.views import LoginView, LogoutView
 
 from .views import (
     IndexView,
     PostDetailView,
     PostCreateView,
-    signup,
     like_post,
     PostUpdateView,
     PostDeleteView,
@@ -17,13 +15,6 @@ from .views import (
 app_name = "blog"
 urlpatterns = [
     path("", IndexView.as_view(), name="index"),
-    path("signup/", signup, name="signup"),
-    path(
-        "accounts/login/",
-        LoginView.as_view(template_name="blog/login.html"),
-        name="login",
-    ),
-    path("logout/", LogoutView.as_view(), name="logout"),
     path("search/", SearchView.as_view(), name="search"),
     path("new-post/", PostCreateView.as_view(), name="create_post"),
     path("trix-upload/", trix_upload, name="trix_upload"),

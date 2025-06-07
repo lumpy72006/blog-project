@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 
-from .forms import CommentForm, PostForm, SignupForm, SearchForm
+from .forms import CommentForm, PostForm, SearchForm
 from .models import Post
 
 
