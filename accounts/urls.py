@@ -10,6 +10,9 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path("profile/", ProfileView.as_view(), name="profile"),
+    # Original path for logged-in user's own profile (no argument)
+    path("profile/", ProfileView.as_view(), name="own_profile"),
+    # Path for viewing a profile by username
+    path("profile/<str:username>/", ProfileView.as_view(), name="profile"),
     path("signup/", signup, name="signup"),
 ]

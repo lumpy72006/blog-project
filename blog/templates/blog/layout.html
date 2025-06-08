@@ -8,7 +8,7 @@
 
   <link rel="stylesheet" type="text/css" href="{% static 'blog/styles.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'accounts/styles.css' %}">
-  <!-- Bootstrap CSS -->
+<!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -42,24 +42,23 @@
     </div>
     <div class="nav-right">
       {% if user.is_authenticated %}
-        <button {% if request.path == '/new-post/' %}style="display:none"{% endif %}>
-          <a href="{% url 'blog:create_post' %}" title="create post">+ create post</a>
-        </button>
+        <a href="{% url 'accounts:own_profile' %}" class="profile-picture-link">
+            <img src="{% if user.profile.profile_picture %}{{ user.profile.profile_picture.url }}{% else %}{% static 'blog/images/default-avatar.png' %}{% endif %}" alt="{{ user.username }}" class="profile-pic">
+        </a>
+        <a href="{% url 'blog:create_post' %}" title="create post" class="button-link create-post-link {% if request.path == '/new-post/' %}hidden{% endif %}">
+          + Create post
+        </a>
         <form method="POST" action="{% url 'accounts:logout' %}" id="logout-form" style="display:inline;">
           {% csrf_token %}
           <input type="hidden" name="next" value="{{ request.path }}">
-          <button type="submit" class="nav-right-logout">Log out</button>
+          <button type="submit" class="button-link logout-button">Log out</button>
         </form>
       {% else %}
         {% if request.path != '/accounts/login/' %}
-          <button>
-            <a href="{% url 'accounts:login' %}?next={% url 'blog:create_post' %}" title="create post">
-              + create post
-            </a>
-          </button>
-          <button>
-            <a href="{% url 'accounts:login' %}?next={{ request.path }}">Log in</a>
-          </button>
+          <a href="{% url 'blog:create_post' %}" title="create post" class="button-link create-post-link">
+            + Create post
+          </a>
+          <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="button-link login-button">Log in</a>
         {% endif %}
       {% endif %}
     </div>

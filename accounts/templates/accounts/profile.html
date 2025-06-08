@@ -5,15 +5,18 @@
 <div class="profile-container">
     <div class="profile-header">
         <div class="avatar-container">
-            {% if user.profile.profile_picture %}
-                <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}'s Avatar" class="profile-avatar">
+            {# Use profile_obj.profile_picture to access the picture of the profile being displayed #}
+            {% if profile_obj.profile_picture %}
+                <img src="{{ profile_obj.profile_picture.url }}" alt="{{ profile_obj.user.username }}'s Avatar" class="profile-avatar">
             {% else %}
                 <img src="{% static 'blog/images/default-avatar.png' %}" alt="Default Avatar" class="profile-avatar">
             {% endif %}
         </div>
         <div class="profile-info">
-            <h1>{{ user.username }}</h1>
-            <button class="edit-profile-btn">Edit profile</button>
+            <h1>{{ profile_obj.user.username }}</h1>
+            {% if profile_obj.user == request.user %}
+                <button class="edit-profile-btn">edit profile</button>
+            {% endif %}
         </div>
     </div>
 

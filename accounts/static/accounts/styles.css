@@ -47,7 +47,7 @@
 
 .edit-profile-btn {
   background: #f0f0f0;
-  color: #0066cc;
+  color: #666666;
   border: 1px solid #e1e1e1;
   border-radius: 6px;
   padding: 5px 10px;
@@ -99,7 +99,7 @@
 
 .profile-section-post-title {
   font-size: 1.1em;
-  color: #0066cc;
+  color: #333333;
   margin: 0;
   word-wrap: break-word;
   max-width: 80%;
