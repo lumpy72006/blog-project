@@ -1,9 +1,9 @@
 .profile-container {
   max-width: 1000px;
   margin: 20px auto;
-  background: #0d1117;
-  color: #c9d1d9;
-  border: 1px solid #30363d;
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e1e1e1;
   border-radius: 6px;
   overflow: hidden;
 }
@@ -12,8 +12,8 @@
   display: flex;
   align-items: center;
   padding: 20px;
-  background: #161b22;
-  border-bottom: 1px solid #30363d;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e1e1e1;
 }
 
 .avatar-container {
@@ -27,7 +27,7 @@
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #30363d;
+  border: 2px solid #e1e1e1;
   transition: transform 0.2s ease-in-out;
 }
 
@@ -36,19 +36,19 @@
 }
 
 .avatar-container:hover .avatar-overlay {
-  background: #21262d;
+  background: #f0f0f0;
 }
 
 .profile-info h1 {
   font-size: 1.5em;
   margin: 0 0 10px 0;
-  color: #c9d1d9;
+  color: #333333;
 }
 
 .edit-profile-btn {
-  background: #21262d;
-  color: #58a6ff;
-  border: 1px solid #30363d;
+  background: #f0f0f0;
+  color: #0066cc;
+  border: 1px solid #e1e1e1;
   border-radius: 6px;
   padding: 5px 10px;
   cursor: pointer;
@@ -56,7 +56,7 @@
 }
 
 .edit-profile-btn:hover {
-  background: #30363d;
+  background: #e1e1e1;
 }
 
 .profile-content {
@@ -66,7 +66,7 @@
 .profile-section h2 {
   font-size: 1.2em;
   margin-bottom: 15px;
-  color: #c9d1d9;
+  color: #333333;
 }
 
 .post-list {
@@ -76,15 +76,13 @@
 }
 
 .post-card {
-  background: #161b22;
-  border: 1px solid #30363d;
+  background: #ffffff;
+  border: 1px solid #e1e1e1;
   border-radius: 6px;
   padding: 15px;
   position: relative;
   overflow: hidden;
-  /* Prevent text overflow */
   max-height: 200px;
-  /* Limit card height to control overflow */
 }
 
 .post-card:hover {
@@ -101,10 +99,9 @@
 
 .profile-section-post-title {
   font-size: 1.1em;
-  color: #58a6ff;
+  color: #0066cc;
   margin: 0;
   word-wrap: break-word;
-  /* Ensure long titles wrap */
   max-width: 80%;
 }
 
@@ -118,18 +115,18 @@
 }
 
 .published {
-  background: #238636;
+  background: #28a745;
   color: #ffffff;
 }
 
 .draft {
-  background: #9e6a03;
+  background: #ffc107;
   color: #ffffff;
 }
 
 .post-description {
   font-size: 0.9em;
-  color: #8b949e;
+  color: #666666;
   margin: 0 0 10px 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,12 +136,12 @@
   word-wrap: break-word;
 }
 
-.post-meta {
+.profile-post-meta {
   font-size: 0.8em;
-  color: #8b949e;
+  color: #666666;
 }
 
-.post-date {
+.profile-post-date {
   display: block;
   margin-top: 5px;
 }
@@ -184,6 +181,5 @@
 
   .post-card {
     max-height: 250px;
-    /* Adjust for mobile readability */
   }
 }
