@@ -1,11 +1,15 @@
+import logging
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView
+from django.urls import reverse
+from django.views.generic import DetailView, UpdateView
 
-from .forms import SignupForm
+from .forms import ProfileForm, SignupForm
 from .models import Profile
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 class ProfileView(LoginRequiredMixin, DetailView):
@@ -29,6 +33,20 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["posts"] = self.object.user.posts.all()
         return context
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = Profile
+    form_class = ProfileForm
+    template_name = "accounts/edit_profile.html"
+    context_object_name = 'profile_obj' # Renamed to avoid conflict with 'profile' context
+
+    # Override get_object to ensure we are editing the logged-in user's profile
+    def get_object(self, queryset=None):
+        return self.request.user.profile
+
+    # Define where to redirect after successful update
+    def get_success_url(self):
+        return reverse('accounts:own_profile')
 
 
 def signup(request):

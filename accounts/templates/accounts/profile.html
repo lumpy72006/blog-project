@@ -15,7 +15,7 @@
         <div class="profile-info">
             <h1>{{ profile_obj.user.username }}</h1>
             {% if profile_obj.user == request.user %}
-                <button class="edit-profile-btn">edit profile</button>
+                <a href="{% url 'accounts:edit_profile' %}" class="edit-profile-btn">edit profile</a>
             {% endif %}
         </div>
     </div>

@@ -1,0 +1,139 @@
+{% extends 'blog/layout.html' %}
+{% load static %}
+
+{% block body %}
+<div class="form-container profile-edit-container">
+    <h2>Edit Your Profile</h2>
+    <form method="post" enctype="multipart/form-data" id="profile-edit-form"> {# ADD AN ID TO THE FORM #}
+        {% csrf_token %}
+
+        {# Display non-field errors if any #}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-group profile-picture-group">
+            <label>Profile Picture</label>
+
+            {# Custom display for the current profile picture #}
+            {% if profile_obj.profile_picture %}
+                <div class="current-profile-picture-display">
+                    <img src="{{ profile_obj.profile_picture.url }}" alt="Current Profile Picture" class="current-avatar">
+                    <div class="current-file-info">
+                        <p>Current: <a href="{{ profile_obj.profile_picture.url }}" target="_blank" class="current-file-link">{{ profile_obj.profile_picture.name }}</a></p>
+                        {# MANUALLY RENDER THE "CLEAR" CHECKBOX AND HIDDEN INPUT #}
+                        <div class="clear-checkbox-wrapper">
+                            {# The actual checkbox input #}
+                            <input type="checkbox"
+                                   name="{{ form.profile_picture.html_name }}-clear"
+                                   id="id_{{ form.profile_picture.html_name }}-clear"
+                                   class="custom-clear-checkbox">
+                            <label for="id_{{ form.profile_picture.html_name }}-clear" class="clear-label">Remove current picture</label>
+                            {# Django's ClearableFileInput also renders a hidden input with value "0" #}
+                            <input type="hidden"
+                                   name="{{ form.profile_picture.html_name }}-clear"
+                                   value="0"
+                                   id="id_{{ form.profile_picture.html_name }}-clear_0">
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="no-current-profile-picture">
+                    <img src="{% static 'blog/images/default-avatar.png' %}" alt="No profile picture" class="current-avatar default-avatar">
+                    <p>No profile picture set.</p>
+                </div>
+            {% endif %}
+
+            {# The actual file input for changing/uploading a new one #}
+            <div class="file-input-wrapper">
+                <input type="file"
+                       name="{{ form.profile_picture.html_name }}"
+                       id="{{ form.profile_picture.id_for_label }}"
+                       class="hidden-file-input"
+                       data-original-name="{{ form.profile_picture.html_name }}"> {# Store original name #}
+                <button type="button" class="custom-file-upload-button" onclick="document.getElementById('{{ form.profile_picture.id_for_label }}').click()">Choose New Picture</button>
+                <span id="file-name-display" class="file-name-display">No file selected.</span>
+            </div>
+
+            {% if form.profile_picture.errors %}
+                <div class="field-errors">
+                    {% for error in form.profile_picture.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.bio.id_for_label }}">Bio</label>
+            {{ form.bio }}
+            {% if form.bio.errors %}
+                <div class="field-errors">
+                    {% for error in form.bio.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="submit-button">Save Changes</button>
+        <a href="{% url 'accounts:own_profile' %}" class="cancel-button">Cancel</a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('{{ form.profile_picture.id_for_label }}');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const form = document.getElementById('profile-edit-form');
+        const originalFileName = fileInput.dataset.originalName; // Retrieve the original name
+
+        if (fileInput && fileNameDisplay && form) {
+            // Update file name display when a new file is chosen
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    fileNameDisplay.textContent = this.files[0].name;
+                    // Restore name attribute if a file is selected
+                    fileInput.setAttribute('name', originalFileName);
+                } else {
+                    fileNameDisplay.textContent = 'No file selected.';
+                    // Remove name attribute if no file is selected, to prevent sending empty data
+                    fileInput.removeAttribute('name');
+                }
+            });
+
+            // Initial check: if no file is pre-selected (e.g., on page load, if input had a value)
+            // or if the page reloads with no file, remove the name attribute
+            if (fileInput.files.length === 0) {
+                fileInput.removeAttribute('name');
+            }
+
+
+            // Add an event listener to the form's submit event
+            form.addEventListener('submit', function(event) {
+                // If no file has been selected in the custom input (and thus name attribute was removed)
+                // this check is redundant if the change event already handles it, but serves as a final safeguard.
+                if (fileInput.files.length === 0) {
+                     // Ensure the name attribute is indeed removed before submission if no file
+                     fileInput.removeAttribute('name');
+                }
+            });
+
+            // IMPORTANT: Re-enable the input and restore name after form submission
+            // This is primarily for cases where there are validation errors and the page reloads,
+            // or if the user navigates back in history.
+            window.addEventListener('load', function() {
+                if (fileInput.files.length > 0) {
+                    fileInput.setAttribute('name', originalFileName);
+                } else {
+                    fileInput.removeAttribute('name');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

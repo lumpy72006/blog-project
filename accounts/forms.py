@@ -9,6 +9,7 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ['bio', 'profile_picture']
         widgets = {
+            'profile_picture': forms.ClearableFileInput(attrs={'class': 'custom-file-input'}),
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 
