@@ -6,6 +6,9 @@ A full-featured blogging platform with authentication, post management, and adva
 
 ### Core Functionality
 - **User Authentication**: Signup, login, and logout
+- **User Profiles**:
+  - View user profiles 
+  - Edit profile information: bio and profile picture
 - **Post Management**: 
   - Create, edit, and delete posts
   - Draft vs. published status
@@ -14,13 +17,12 @@ A full-featured blogging platform with authentication, post management, and adva
   - Authenticated users can comment
   - Admin-approved comment system
 
-### Advanced Search
+### Search
 - **Search across**:
   - Post titles
   - Content
   - Author names (username)
 - **Smart visibility**:
-  - Hidden on auth/management pages
   - Only shows published posts
 
 ### Engagement Features
@@ -39,7 +41,7 @@ A full-featured blogging platform with authentication, post management, and adva
 ## Installation
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/blog-project.git
+git clone https://github.com/lumpy72006/blog-project.git
 cd blog-project
 
 # Set up virtual environment (recommended)
