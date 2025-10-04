@@ -74,24 +74,17 @@ header h1 a {
 /* Styled Links (acting as buttons) */
 .button-link {
     border: 1px solid green;
-    /* Green border */
     font-size: 14px;
     padding: 8px 15px;
-    /* Adjust padding for better look */
+    margin-bottom: 2px;
     border-radius: 18px;
-    /* Rounded corners */
     transition: background-color 0.3s, color 0.3s;
     text-decoration: none;
-    /* Remove underline */
     display: inline-block;
-    /* Allows padding and sizing */
     text-align: center;
     cursor: pointer;
-    /* Indicates it's clickable */
     background-color: transparent;
-    /* Default transparent background */
     color: green;
-    /* Green text color */
 }
 
 .button-link:hover {
@@ -180,11 +173,6 @@ header h1 a {
     color: #555;
 }
 
-.author-date {
-    display: flex;
-    gap: 10px;
-}
-
 /* Post Likes Section */
 .post-likes {
     margin-top: 20px;
@@ -232,8 +220,9 @@ header h1 a {
 
 .post-title {
     font-size: 2rem;
+    font-weight: 500;
     color: #333333;
-    margin-bottom: 10px;
+    margin-bottom: 2px;
 }
 
 .post-meta {

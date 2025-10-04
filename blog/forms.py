@@ -5,12 +5,15 @@ from .models import Post, Comment
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "content", "status"]
+        fields = ["title", "content", "status", "pub_date"]
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "status": forms.Select(attrs={"class": "form-control"}),
+            "pub_date": forms.DateTimeInput(
+                attrs={"class": "form-control", "type": "datetime-local"}
+            ),
         }
-        # Content will be rendered manually in HTML using Trix
+        # Content field will be rendered manually in HTML using Trix
 
 
 class CommentForm(forms.ModelForm):

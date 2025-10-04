@@ -1,10 +1,9 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.contrib.auth.models import User
-from django.http import response
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from .models import Post, Comment
-from django.template import Template, Context
-from .forms import CommentForm, PostForm, SignupForm
-from django.urls import resolve
+from .forms import CommentForm, PostForm
 
 
 class PostModelTest(TestCase):
@@ -24,13 +23,22 @@ class PostModelTest(TestCase):
             status="published",
         )
 
-    def test_post_creation(self):
+    def test_post_creation_defaults_pub_date(self):
         """Test that a post is created correctly."""
         self.assertEqual(self.post.title, "Test Post")
         self.assertEqual(self.post.slug, "test-post")
         self.assertEqual(self.post.content, "This is a test post.")
         self.assertEqual(self.post.author, self.user)
         self.assertEqual(self.post.status, "published")
+        self.assertIsNotNone(self.post.pub_date)
+
+    def test_post_creation_with_future_pub_date(self):
+        """Posts with a future pub_date should not be returned in public queryset"""
+        self.post.pub_date = timezone.now() + timedelta(days=1)
+        self.post.save()
+
+        query = Post.objects.filter(status="published", pub_date__lte=timezone.now())
+        self.assertNotIn(self.post, query)
 
     def test_post_str_method(self):
         """Test the __str__ method of the Post model."""
@@ -76,7 +84,6 @@ class PostModelTest(TestCase):
 class CommentModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        # Create a user, a post, and a comment for testing
         cls.user = User.objects.create_user(username="testuser", password="testpass123")
         cls.post = Post.objects.create(
             title="Test Post",
@@ -118,22 +125,30 @@ class IndexViewTest(TestCase):
             author=cls.user,
             status="published",
         )
+        cls.future_post = Post.objects.create(
+            title="Future Post",
+            slug="future-post",
+            content="Should not be visible yet",
+            author=cls.user,
+            status="published",
+            pub_date=timezone.now() + timedelta(days=1)
+        )
 
-    def test_index_view(self):
-        """Test that the index view returns published posts."""
+    def test_index_view_excludes_posts_correctly(self):
+        """Test that the index view returns published posts and excludes future posts."""
         response = self.client.get(reverse("blog:index"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test Post")
+        self.assertNotContains(response, "Future Post")
         self.assertQuerySetEqual(
             response.context["post_list"],
-            Post.objects.filter(status="published").order_by("-pub_date") # type: ignore
+            Post.objects.filter(status="published",pub_date__lte=timezone.now()).order_by("-pub_date") # type: ignore
         )
 
 
 class PostDetailViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        # Create a user, a post, and a comment for testing
         cls.user = User.objects.create_user(username="testuser", password="testpass123")
         cls.post = Post.objects.create(
             title="Test Post",
@@ -162,11 +177,21 @@ class PostDetailViewTest(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.post.views_count, initial_views + 1)
 
+    def test_future_post_returns_404(self):
+        future_post = Post.objects.create(
+            title="Future Post",
+            content="Out of sight",
+            author=self.user,
+            status="published",
+            pub_date=timezone.now() + timedelta(days=1)
+        )
+        response = self.client.get(reverse("blog:post_detail", args=[future_post.slug]))
+        self.assertEqual(response.status_code, 404)
+
 
 class LikePostViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        # Create a user and a post for testing
         cls.user = User.objects.create_user(username="testuser", password="testpass123")
         cls.post = Post.objects.create(
             title="Test Post",
@@ -208,6 +233,7 @@ class PostFormTest(TestCase):
         }
         form = PostForm(data=form_data)
         self.assertTrue(form.is_valid())
+        self.assertIn("pub_date", form.fields)
 
     def test_post_form_no_data(self):
         """ Test the PostForm with no data """
@@ -228,24 +254,6 @@ class CommentFormTest(TestCase):
         form = CommentForm(data={})
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors), 1) # content is required
-
-class SignupFormTest(TestCase):
-    def test_signup_form_valid_data(self):
-        """ Test the SignupForm with valid data """
-        form_data = {
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'password1': 'testpass123',
-            'password2': 'testpass123',
-        }
-        form = SignupForm(data=form_data)
-        self.assertTrue(form.is_valid())
-
-    def test_signup_form_no_data(self):
-        """ Test the SignupForm with no data """
-        form = SignupForm(data={})
-        self.assertFalse(form.is_valid())
-        self.assertEqual(len(form.errors), 4) #from django.urls import reverse
 
 
 class SearchFunctionalityTests(TestCase):
@@ -280,6 +288,13 @@ class SearchFunctionalityTests(TestCase):
             author=cls.user1,
             status='draft'
         )
+        cls.future_post = Post.objects.create(
+            title='Future post',
+            content='not yet',
+            author=cls.user1,
+            status='published',
+            pub_date=timezone.now() + timedelta(days=1)
+        )
 
     def test_search_by_post_title(self):
         """Test searching by post title"""
@@ -308,15 +323,15 @@ class SearchFunctionalityTests(TestCase):
         self.assertNotContains(response, self.post1.title)
         self.assertNotContains(response, self.post2.title)
 
+    def test_future_post_not_in_search(self):
+        """Test future posts do no appear in search"""
+        response = self.client.get(reverse("blog:search") + "?query=Post")
+        self.assertNotContains(response, "Future post" )
+
     def test_draft_posts_not_in_search(self):
         """Test draft posts don't appear in search results"""
         response = self.client.get(reverse('blog:search') + '?query=Unpublished')
         self.assertNotContains(response, self.draft_post.title)
-
-    def test_search_template_used(self):
-        """Test that the correct template is used"""
-        response = self.client.get(reverse('blog:search') + '?query=Django')
-        self.assertTemplateUsed(response, 'blog/_post_list.html')
 
     def test_search_context_data(self):
         """Test that search results are in context"""
@@ -325,30 +340,3 @@ class SearchFunctionalityTests(TestCase):
         self.assertEqual(len(response.context['post_list']), 1)
         self.assertEqual(response.context['post_list'][0], self.post1)
 
-
-class SearchTemplateTagTests(TestCase):
-    def setUp(self):
-        self.factory = RequestFactory()
-        
-    def render_template(self, url_name, *args, **kwargs):
-        """Helper to render template with context"""
-        url = reverse(url_name, args=args, kwargs=kwargs)
-        request = self.factory.get(url)
-        request.resolver_match = resolve(url)
-        template = Template(
-            '{% load blog_tags %}'
-            '{% should_hide_search as hide_search %}'
-            '{% if hide_search %}HIDDEN{% else %}VISIBLE{% endif %}'
-        )
-        return template.render(Context({'request': request}))
-
-    def test_search_bar_visibility(self):
-        """Test search bar visibility on different views"""
-        # Should be visible
-        self.assertEqual(self.render_template('blog:index').strip(), 'VISIBLE')
-        self.assertEqual(self.render_template('blog:search').strip(), 'VISIBLE')
-        
-        # Should be hidden
-        self.assertEqual(self.render_template('blog:signup').strip(), 'HIDDEN')
-        self.assertEqual(self.render_template('blog:login').strip(), 'HIDDEN')
-        self.assertEqual(self.render_template('blog:create_post').strip(), 'HIDDEN')

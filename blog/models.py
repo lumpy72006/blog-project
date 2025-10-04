@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from django.utils import timezone
 
 
 # Create your models here.
@@ -16,12 +17,12 @@ class Post(models.Model):
     content = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default="published"
+        max_length=10, choices=STATUS_CHOICES, default="draft"
     )
     create_date = models.DateTimeField(auto_now_add=True)
-    pub_date = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField(null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True)
-    views_count = models.PositiveIntegerField(default=0)  # Tracks post views
+    views_count = models.PositiveIntegerField(default=0)
     likes = models.PositiveIntegerField(default=0)
     liked_by = models.ManyToManyField(User, related_name="liked_posts", blank=True)
     reading_time = models.PositiveIntegerField(default=0)
@@ -29,7 +30,6 @@ class Post(models.Model):
     class Meta:
         ordering = ["-pub_date"]
         indexes = [
-            models.Index(fields=["slug"], name="slug_idx"),
             models.Index(fields=["pub_date"], name="pub_date_idx"),
             models.Index(fields=["status"], name="status_idx"),
             models.Index(fields=["title"], name="title_idx"),
@@ -48,8 +48,10 @@ class Post(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        # Ensure the slug is unique
+        if not self.pub_date:
+            self.pub_date = timezone.now()
 
+        # Ensure the slug is unique
         if not self.slug:
             self.slug = slugify(self.title)
 

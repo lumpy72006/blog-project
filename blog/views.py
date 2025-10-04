@@ -1,12 +1,12 @@
 import os
 import uuid
 from django.conf import settings
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
@@ -18,6 +18,7 @@ from .models import Post
 
 # Create your views here.
 class IndexView(ListView):
+    model = Post
     template_name = "blog/index.html"
     context_object_name = "post_list"
 
@@ -26,25 +27,40 @@ class IndexView(ListView):
         Return published posts; order by: -pub_date(most recent appear first)
         """
 
-        return Post.objects.filter(status="published").order_by("-pub_date")
+        return super().get_queryset().filter(
+            status="published", pub_date__lte=timezone.now()
+        ).order_by("-pub_date")
+
 
 
 class PostDetailView(DetailView):
     model = Post
     template_name = "blog/post_detail.html"
 
-    # override get method to increment views when a post is viewed
+    def get_queryset(self):
+        """
+        Return only published posts with a pub_date in the past.
+        Also, optimize database queries by prefetching comments and liked_by users,
+        and selecting related author.
+        """
+        return super().get_queryset().filter(
+            status="published",
+            pub_date__lte=timezone.now()
+        ).select_related('author').prefetch_related('comments', 'liked_by')
+
     def get(self, request, *args, **kwargs):
-        # Call the parent class's get method to set up the response
+        """
+        Increment the views count for the post when it is viewed.
+        """
         response = super().get(request, *args, **kwargs)
-
-        # Increment the views count for the post
         self.object.increment_views()
-
         return response
 
-    # override get_context_data method to add additional context data
     def get_context_data(self, **kwargs):
+        """
+        Add additional context data, including likes, reading time, and
+        the comment form.
+        """
         context = super().get_context_data(**kwargs)
         post = self.object
         context["likes"] = post.likes
@@ -91,7 +107,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
     template_name = "blog/delete_post.html"
-    success_url = "/"  # Redirect to the home page after deletion
+    success_url = "/"
 
     def test_func(self):
         """Ensure only the author can delete the post."""
@@ -100,6 +116,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == post.author
 
 class SearchView(ListView):
+    model = Post
     template_name = "blog/search_results.html"
     context_object_name = "post_list"
     paginate_by = 10
@@ -107,12 +124,13 @@ class SearchView(ListView):
     def get_queryset(self):
         query = self.request.GET.get('query', '')
         if query:
-            return Post.objects.filter(
+            return super().get_queryset().filter(
                 Q(status="published") &
+                Q(pub_date__lte=timezone.now()) &
                 (Q(title__icontains=query) |
                  Q(content__icontains=query) |
                  Q(author__username__icontains=query))
-            ).distinct().order_by("pub_date")
+            ).distinct().order_by("-pub_date")
 
         return Post.objects.none()
 
@@ -138,21 +156,6 @@ def trix_upload(request):
             file_url = f"{settings.MEDIA_URL}{file_path}"
             return JsonResponse({'url': file_url})
     return JsonResponse({'error': 'Upload failed'}, status=400)
-
-
-def signup(request):
-    if request.method == "POST":
-        form = SignupForm(request.POST)
-
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-
-            return redirect("blog:index")
-    else:
-        form = SignupForm()
-
-    return render(request, "blog/signup.html", {"form": form})
 
 
 @login_required

@@ -126,9 +126,7 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGOUT_REDIRECT_URL = "blog:index"
-LOGIN_URL = (
-    "accounts:login"  # This is where users will be redirected if they are not logged in
-)
+LOGIN_URL = ( "accounts:login" )
 
 MEDIA_URL ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
