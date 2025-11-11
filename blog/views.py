@@ -3,7 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -37,16 +37,29 @@ class PostDetailView(DetailView):
     model = Post
     template_name = "blog/post_detail.html"
 
-    def get_queryset(self):
+    def get_object(self, queryset=None):
         """
-        Return only published posts with a pub_date in the past.
-        Also, optimize database queries by prefetching comments and liked_by users,
-        and selecting related author.
+        Retrieve post and apply visibility rules
+        Drafts are ONLY visible to the author 
         """
-        return super().get_queryset().filter(
-            status="published",
-            pub_date__lte=timezone.now()
-        ).select_related('author').prefetch_related('comments', 'liked_by')
+
+        slug = self.kwargs.get(self.slug_url_kwarg)
+
+        try:
+            post = get_object_or_404(
+                self.model.objects.select_related('author').prefetch_related('comments', 'liked_by'),
+                slug = slug
+            )
+        except Http404:
+            raise Http404("No post found matching the query")
+
+        is_public = (post.status == "published" and post.pub_date <= timezone.now())
+        is_author = (self.request.user.is_authenticated and self.request.user == post.author)
+
+        if is_public or is_author:
+            return post
+        else:
+            raise Http404("No post found matching the query")
 
     def get(self, request, *args, **kwargs):
         """
