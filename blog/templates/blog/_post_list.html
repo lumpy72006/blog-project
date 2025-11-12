@@ -1,21 +1,53 @@
-{% if post_list %}
-  {% for post in post_list %}
-    <a href="{{ post.get_absolute_url }}" class="post-link text-decoration-none text-dark">
-      <div class="post-container">
-        <h1 class="post-title">{{ post.title }}</h1>
-        <h6 class="post-meta">
-            <span class="post-author">{{ post.author|title }}</span>
-            <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
-            <span class="reading-time">{{ reading_time }} min read</span>
-        </h6>
-        <p>{{ post.content|striptags|truncatewords:30|safe }}</p>
-      </div>
-    </a>
-  {% endfor %}
-{% else %}
-  {% if empty_message %}
-    <div class="alert alert-info">{{ empty_message }}</div>
-  {% else %}
-    <p>No posts yet.</p>
-  {% endif %}
-{% endif %}
+{% load static %}
+
+<main>
+    {% if posts %}
+        <div class="posts-container">
+            {% for post in posts %}
+                <a href="{{ post.get_absolute_url }}" class="post-link">
+                    <article class="post-container">
+                        {% if post.featured_image %}
+                            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="post-featured-image">
+                        {% endif %}
+
+                        {% if forloop.first %}
+                            <!-- First post gets overlay treatment -->
+                            <div class="post-overlay">
+                                <h2>{{ post.title }}</h2>
+                                <p class="post-excerpt">{{ post.content|striptags|truncatewords:30|safe }}</p>
+                                <div class="post-meta">
+                                    <span class="post-author">{{ post.author|title }}</span>
+                                    <span class="post-date">{{ post.pub_date|date:"M d, Y" }}</span>
+                                    <span class="reading-time">{{ post.reading_time }} min read</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <!-- Regular posts -->
+                            <div class="post-content-wrapper">
+                                <h2>{{ post.title }}</h2>
+                                <p class="post-excerpt">{{ post.content|striptags|truncatewords:20|safe }}</p>
+                                <div class="post-meta">
+                                    <span class="post-author">{{ post.author|title }}</span>
+                                    <span class="post-date">{{ post.pub_date|date:"M d, Y" }}</span>
+                                    <span class="reading-time">{{ post.reading_time }} min read</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </article>
+                </a>
+            {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: var(--text-muted);">
+                    <p>No posts yet. Be the first to create one!</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if empty_message %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: var(--text-muted);">
+                {{ empty_message}}
+            </div>
+        {% else %}
+            <p>No posts yet.</p>
+        {% endif %}
+    {% endif %}
+</main>

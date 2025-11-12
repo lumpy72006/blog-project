@@ -20,7 +20,7 @@ from .models import Post
 class IndexView(ListView):
     model = Post
     template_name = "blog/index.html"
-    context_object_name = "post_list"
+    context_object_name = "posts"
 
     def get_queryset(self):
         """
@@ -131,7 +131,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class SearchView(ListView):
     model = Post
     template_name = "blog/search_results.html"
-    context_object_name = "post_list"
+    context_object_name = "posts"
     paginate_by = 10
 
     def get_queryset(self):

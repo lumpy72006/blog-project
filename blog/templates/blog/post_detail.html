@@ -3,49 +3,58 @@
 
 {% block body %}
 <div class="post-detail-container">
-    <h1 class="post-title">{{ post.title }}</h1>
-    <h6 class="post-meta">
-        <span class="post-author">{{ post.author|title }}</span>
-        <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
-        <span class="reading-time">{{ reading_time }} min read</span>
-    </h6>
-    <div class="post-content trix-content">
-        {{ post.content|safe }}
-    </div>
 
-    <div class="post-actions-container">
-        <div class="post-likes">
-            <!-- Like Button -->
-            {% if user.is_authenticated %}
+    <div class="post-detail-content">
+        <h1 class="post-title">{{ post.title }}</h1>
+        <h6 class="post-meta">
+            <span class="post-author">{{ post.author|title }}</span>
+            <span class="post-date">{{ post.pub_date|date:"F d, Y" }}</span>
+            <span class="reading-time">{{ reading_time }} min read</span>
+        </h6>
+
+        {% if post.featured_image %}
+            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="post-detail-hero">
+        {% endif %}
+
+        <div class="post-content trix-content">
+            {{ post.content|safe }}
+        </div>
+
+        <div class="post-actions-container">
+            <div class="post-likes">
+                <!-- Like Button -->
+                {% if user.is_authenticated %}
                 <form id="like-form" action="{% url 'blog:like_post' post.slug %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="like-button {% if user_has_liked %}liked{% endif %}">
                         <i class="fas fa-thumbs-up"></i>
                     </button>
                 </form>
-            {% else %}
+                {% else %}
                 <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="like-button"><i class="fas fa-thumbs-up"></i></a>
-            {% endif %}
+                {% endif %}
 
-            <!-- Likes count separate from the button -->
-            <span id="likes-count">{{ likes }}</span>
+                <!-- Likes count separate from the button -->
+                <span id="likes-count">{{ likes }}</span>
 
-            <!-- Comment svg and no of comments -->
-            <div class="comment-like-svgs">
-                <span id="comment-button" class="comment-button">
-                    {% include './icons/icons8-comment.svg' %}
-                </span>
-                <span id="comments-count">{{ comments.count }}</span>
+                <!-- Comment svg and no of comments -->
+                <div class="comment-like-svgs">
+                    <span id="comment-button" class="comment-button">
+                        {% include './icons/icons8-comment.svg' %}
+                    </span>
+                    <span id="comments-count">{{ comments.count }}</span>
+                </div>
             </div>
+
+            <!-- edit or delete posts - moved to bottom right -->
+            {% if user == post.author %}
+            <div class="post-author-actions">
+                <a href="{% url 'blog:edit_post' post.slug %}" class="edit-button" >Edit</a>
+                <a href="{% url 'blog:delete_post' post.slug %}" class="delete-button">Delete</a>
+            </div>
+            {% endif %}
         </div>
 
-        <!-- edit or delete posts - moved to bottom right -->
-        {% if user == post.author %}
-        <div class="post-author-actions">
-            <a href="{% url 'blog:edit_post' post.slug %}" class="edit-button" >Edit</a>
-            <a href="{% url 'blog:delete_post' post.slug %}" class="delete-button">Delete</a>
-        </div>
-        {% endif %}
     </div>
 
     <!-- Comment Form at the bottom -->
@@ -55,7 +64,7 @@
 
             {% if user.is_authenticated %}
             <form id="comment-form" class="comment-form" 
-                  action="{% url 'blog:comment' post.slug %}" method="post">
+                action="{% url 'blog:comment' post.slug %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" id="comment-content" name="content" value="">
                 <trix-editor input="comment-content" class="trix-content form-control" placeholder="Share your thoughts..."></trix-editor>

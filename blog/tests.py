@@ -141,7 +141,7 @@ class IndexViewTest(TestCase):
         self.assertContains(response, "Test Post")
         self.assertNotContains(response, "Future Post")
         self.assertQuerySetEqual(
-            response.context["post_list"],
+            response.context["posts"],
             Post.objects.filter(status="published",pub_date__lte=timezone.now()).order_by("-pub_date") # type: ignore
         )
 
@@ -336,7 +336,7 @@ class SearchFunctionalityTests(TestCase):
     def test_search_context_data(self):
         """Test that search results are in context"""
         response = self.client.get(reverse('blog:search') + '?query=Django')
-        self.assertIn('post_list', response.context)
-        self.assertEqual(len(response.context['post_list']), 1)
-        self.assertEqual(response.context['post_list'][0], self.post1)
+        self.assertIn('posts', response.context)
+        self.assertEqual(len(response.context['posts']), 1)
+        self.assertEqual(response.context['posts'][0], self.post1)
 

@@ -1,3 +1,4 @@
+from django.core.files.storage import default_storage
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
@@ -26,6 +27,7 @@ class Post(models.Model):
     likes = models.PositiveIntegerField(default=0)
     liked_by = models.ManyToManyField(User, related_name="liked_posts", blank=True)
     reading_time = models.PositiveIntegerField(default=0)
+    featured_image = models.ImageField(upload_to="featured_images/", null=True, blank=True)
 
     class Meta:
         ordering = ["-pub_date"]
