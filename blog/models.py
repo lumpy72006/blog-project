@@ -1,4 +1,3 @@
-from django.core.files.storage import default_storage
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
@@ -20,7 +19,7 @@ class Post(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="draft"
     )
-    create_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True)
     pub_date = models.DateTimeField(null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True)
     views_count = models.PositiveIntegerField(default=0)
@@ -87,3 +86,7 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ["-created_date"]
+        indexes = [
+            models.Index(fields=['post', 'approved', 'created_date']),
+            models.Index(fields=['approved', 'created_date']),
+        ]

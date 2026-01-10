@@ -6,7 +6,6 @@ __pycache__/
 # Virtual environment
 venv/
 env/
-.blog/
 
 # Django Secret Key
 *.env
@@ -26,3 +25,6 @@ staticfiles/
 *.swp
 .idea/
 *.swo
+
+# Coverage report
+lcov/

@@ -8,12 +8,12 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 
 from .forms import CommentForm, PostForm, SearchForm
-from .models import Post
+from .models import Comment, Post
 
 
 # Create your views here.
@@ -29,7 +29,7 @@ class IndexView(ListView):
 
         return super().get_queryset().filter(
             status="published", pub_date__lte=timezone.now()
-        ).order_by("-pub_date")
+        ).select_related('author').order_by("-pub_date")
 
 
 
@@ -42,20 +42,29 @@ class PostDetailView(DetailView):
         Retrieve post and apply visibility rules
         Drafts are ONLY visible to the author 
         """
-
         slug = self.kwargs.get(self.slug_url_kwarg)
-
-        try:
-            post = get_object_or_404(
-                self.model.objects.select_related('author').prefetch_related('comments', 'liked_by'),
-                slug = slug
+        
+        # Use the optimized queryset
+        if queryset is None:
+            queryset = self.get_queryset()
+        
+        # Prefetch comments with authors and select related author
+        queryset = queryset.select_related('author').prefetch_related(
+            'liked_by',
+            Prefetch(
+                'comments',
+                queryset=Comment.objects.filter(approved=True).select_related('author').order_by('-created_date')
             )
-        except Http404:
+        )
+        
+        try:
+            post = queryset.get(slug=slug)
+        except Post.DoesNotExist:
             raise Http404("No post found matching the query")
-
+        
         is_public = (post.status == "published" and post.pub_date <= timezone.now())
         is_author = (self.request.user.is_authenticated and self.request.user == post.author)
-
+        
         if is_public or is_author:
             return post
         else:
@@ -75,11 +84,14 @@ class PostDetailView(DetailView):
         the comment form.
         """
         context = super().get_context_data(**kwargs)
+
         post = self.object
+
         context["likes"] = post.likes
         context["reading_time"] = post.reading_time
         context["user_has_liked"] = self.request.user in post.liked_by.all()
-        context["comments"] = post.comments.filter(approved=True).order_by('-created_date')
+        # comments are already prefetched and filtered in get_object
+        context["comments"] = post.comments.all()
         context["comment_form"] = CommentForm()
 
         return context
@@ -175,7 +187,9 @@ def trix_upload(request):
 def like_post(request, slug):
     post = get_object_or_404(Post, slug=slug)
 
-    if request.user in post.liked_by.all():
+    liked = request.user in post.liked_by.all()
+
+    if liked:
         post.liked_by.remove(request.user)
         post.likes -= 1
     else:
@@ -186,7 +200,7 @@ def like_post(request, slug):
     return JsonResponse(
         {
             "likes": post.likes,
-            "user_has_liked": request.user in post.liked_by.all(),
+            "user_has_liked": not liked,
         }
     )
 
@@ -209,7 +223,8 @@ def comment(request, slug):
                 'author': request.user.username,
                 'created_date': comment.created_date.strftime("%B %d, %Y %H:%M"),
                 'content': comment.content,
-                'comments_count': post.comments.filter(approved=True).count()
+                # comments are already prefetched and filtered in get_object
+                'comments_count': len(post.comments.all())
             })
 
     return JsonResponse({'success': False}, status=400)

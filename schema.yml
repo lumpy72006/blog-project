@@ -1,0 +1,1005 @@
+openapi: 3.0.3
+info:
+  title: Valley Blog API
+  version: 1.0.0
+  description: University content platform API
+paths:
+  /api/:
+    get:
+      operationId: root_retrieve
+      description: API Root - Discover all available endpoints.
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/posts/:
+    get:
+      operationId: posts_list
+      description: List all published posts. Authenticated users can also see their
+        own drafts.
+      parameters:
+      - in: query
+        name: author__username
+        schema:
+          type: string
+        description: Filter posts by author username
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search in title, content, or author username
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - draft
+          - published
+        description: Filter posts by status
+      tags:
+      - posts
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPostListList'
+          description: ''
+    post:
+      operationId: posts_create
+      description: Create a new post. Requires authentication. Author is automatically
+        set to the current user.
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreateUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostCreateUpdate'
+          description: ''
+  /api/posts/{slug}/:
+    get:
+      operationId: posts_retrieve
+      description: Retrieve a single published post. Authors can also retrieve their
+        own drafts. View count is incremented.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+    put:
+      operationId: posts_update
+      description: Fully update an existing post. Requires authentication and authorship.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreateUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostCreateUpdate'
+          description: ''
+    patch:
+      operationId: posts_partial_update
+      description: Partially update an existing post. Requires authentication and
+        authorship.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPostCreateUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPostCreateUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPostCreateUpdate'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostCreateUpdate'
+          description: ''
+    delete:
+      operationId: posts_destroy
+      description: Delete a post. Requires authentication and authorship.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/posts/{slug}/comments/:
+    get:
+      operationId: posts_comments_list
+      description: List comments (GET) or create a comment (POST). Comment creation
+        requires authentication.
+      parameters:
+      - in: query
+        name: author__username
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - draft
+          - published
+        description: |-
+          * `draft` - Draft
+          * `published` - Published
+      tags:
+      - posts
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCommentList'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+    post:
+      operationId: posts_comments_create
+      description: List comments (GET) or create a comment (POST). Comment creation
+        requires authentication.
+      parameters:
+      - in: query
+        name: author__username
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - draft
+          - published
+        description: |-
+          * `draft` - Draft
+          * `published` - Published
+      tags:
+      - posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCommentList'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/posts/{slug}/like/:
+    post:
+      operationId: posts_like_create
+      description: Toggle like/unlike on a post. Requires authentication.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - posts
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  liked:
+                    type: boolean
+                  likes_count:
+                    type: integer
+          description: ''
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/users/:
+    get:
+      operationId: users_list
+      description: |-
+        "
+        GET /api/users/ - List all users
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserListList'
+          description: ''
+  /api/users/{username}/posts/:
+    get:
+      operationId: users_posts_list
+      description: |-
+        ViewSet to list posts by a specific user.
+        GET /users/{username}/posts/ - List user's published posts
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPostListList'
+          description: ''
+components:
+  schemas:
+    Comment:
+      type: object
+      description: |-
+        Serializer for Comment model.
+        author is read-only because we set it automatically from request.user
+      properties:
+        content:
+          type: string
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+        approved:
+          type: boolean
+          readOnly: true
+      required:
+      - approved
+      - author
+      - content
+      - created_date
+    CommentCreate:
+      type: object
+      description: |-
+        Serializer for creating comments.
+        post and author are set in the view, not by user input.
+      properties:
+        content:
+          type: string
+      required:
+      - content
+    PaginatedCommentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+    PaginatedPostListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostList'
+    PaginatedUserListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserList'
+    PatchedPostCreateUpdate:
+      type: object
+      description: |-
+        Serializer for creating and updating posts.
+        Only includes fields the user should be able to set.
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        content:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        featured_image:
+          type: string
+          format: uri
+          nullable: true
+    PostCreateUpdate:
+      type: object
+      description: |-
+        Serializer for creating and updating posts.
+        Only includes fields the user should be able to set.
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        content:
+          type: string
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        featured_image:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - content
+      - title
+    PostDetail:
+      type: object
+      description: |-
+        Full serializer for a single post view.
+        Includes full content, comments, etc.
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        content:
+          type: string
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+        pub_date:
+          type: string
+          format: date-time
+          nullable: true
+        last_updated:
+          type: string
+          format: date-time
+          readOnly: true
+        reading_time:
+          type: integer
+          readOnly: true
+        views_count:
+          type: integer
+          readOnly: true
+        likes:
+          type: integer
+          readOnly: true
+        is_liked:
+          type: boolean
+          description: Check if current user has liked this post
+          readOnly: true
+        is_author:
+          type: boolean
+          description: Check if current user is the author (for edit/delete permissions)
+          readOnly: true
+        featured_image:
+          type: string
+          format: uri
+          nullable: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+          readOnly: true
+        comments_count:
+          type: integer
+          readOnly: true
+      required:
+      - author
+      - comments
+      - comments_count
+      - content
+      - created_date
+      - is_author
+      - is_liked
+      - last_updated
+      - likes
+      - reading_time
+      - slug
+      - title
+      - views_count
+    PostList:
+      type: object
+      description: |-
+        Lightweight serializer for listing posts.
+        Does not include full content or comments
+      properties:
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        excerpt:
+          type: string
+          description: Get the first 100 characters of the content as preview
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        pub_date:
+          type: string
+          format: date-time
+          nullable: true
+        views_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        reading_time:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        likes:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        comments_count:
+          type: integer
+          description: Count approved comments only
+          readOnly: true
+        featured_image:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - author
+      - comments_count
+      - excerpt
+      - slug
+      - title
+      - url
+    StatusEnum:
+      enum:
+      - draft
+      - published
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `published` - Published
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    User:
+      type: object
+      description: |-
+        Serializer for User model.
+        Used when we need to show author info in posts/comments.
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+      required:
+      - username
+    UserList:
+      type: object
+      description: Simple serializer for listing users
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        posts_url:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - posts_url
+      - username
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
