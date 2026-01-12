@@ -10,8 +10,11 @@ env/
 # Django Secret Key
 *.env
 
-# Django Migrations
-**/migrations/
+# Ignore compiled python files in migrations
+**/migrations/*.pyc
+**/migrations/__pycache__/
+
+# BUT DO NOT IGNORE the migration folders themselves!
 
 # Media and static files
 media/
