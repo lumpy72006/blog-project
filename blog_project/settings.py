@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     "valley.pxxl.click",
     ".pxxl.click",
     "valley-wjpg.onrender.com",
+    "127.0.0.1",
 ]
 
 
