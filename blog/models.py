@@ -34,7 +34,6 @@ class Post(models.Model):
             models.Index(fields=["pub_date"], name="pub_date_idx"),
             models.Index(fields=["status"], name="status_idx"),
             models.Index(fields=["title"], name="title_idx"),
-            models.Index(fields=["content"], name="content_idx"),
         ]
 
     def get_absolute_url(self):
