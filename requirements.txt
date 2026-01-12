@@ -2,6 +2,7 @@ asgiref==3.8.1
 async-timeout==5.0.1
 attrs==25.4.0
 coverage==7.12.0
+dj-database-url==3.1.0
 Django==5.2.10
 django-bootstrap5==25.1
 django-filter==25.2
@@ -22,6 +23,7 @@ jsonschema-specifications==2025.9.1
 packaging==25.0
 pillow==11.1.0
 pluggy==1.6.0
+psycopg2-binary==2.9.11
 Pygments==2.19.2
 PyJWT==2.10.1
 pytest==9.0.1
