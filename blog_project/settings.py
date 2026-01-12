@@ -27,7 +27,6 @@ SECRET_KEY = "django-insecure-59h=)awx8bd+x)h93w%&4(53z#h#5v6j+zwa&+$h^sh5fh*j)m
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "*",
     "valley.pxxl.click",
     ".pxxl.click",
 ]
