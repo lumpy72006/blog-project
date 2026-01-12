@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "valley.pxxl.click",
     ".pxxl.click",
+    "valley-wjpg.onrender.com",
 ]
 
 
