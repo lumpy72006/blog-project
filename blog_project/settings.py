@@ -218,4 +218,16 @@ CLOUDINARY_STORAGE = {
 }
 
 # Tell Django to use Cloudinary for uploaded media
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+#DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# Django 5.1+ Storage Configuration
+
+STORAGES = {
+    # 1. Media Files (Uploaded images) -> Cloudinary
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    # 2. Static Files (CSS, JS) -> WhiteNoise (Required for Render)
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
