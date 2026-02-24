@@ -1,4 +1,6 @@
-# Valley Blog Platform
+# Valley
+<img width="969" height="646" alt="image" src="https://github.com/user-attachments/assets/c372bdb2-5f5f-41f9-955f-5d11a794d3c4" />
+
 
 A full-featured blogging platform with authentication, post management, and advanced search capabilities.
 
@@ -6,9 +8,15 @@ A full-featured blogging platform with authentication, post management, and adva
 
 ### Core Functionality
 - **User Authentication**: Signup, login, and logout
+ <img width="1101" height="382" alt="image" src="https://github.com/user-attachments/assets/e26bcbdc-1bda-42ec-b9a1-6a68ff153d12" />
+
 - **User Profiles**:
-  - View user profiles 
+  - View user profiles
+  <img width="595" height="341" alt="image" src="https://github.com/user-attachments/assets/1cadc4f0-1576-40c9-81f4-96ef527d12e4" />
+
   - Edit profile information: bio and profile picture
+  <img width="599" height="379" alt="image" src="https://github.com/user-attachments/assets/fa368e8b-9745-4ce2-8cc7-573e09a68a30" />
+
 - **Post Management**: 
   - Create, edit, and delete posts
   - Draft vs. published status
